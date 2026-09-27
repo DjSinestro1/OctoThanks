@@ -1,6 +1,6 @@
 -- OctoThanks
 -- Small Vanilla 1.12 addon for OctoWow/Turtle-style clients.
--- It says (or optionally whispers) thanks to players who buff you.
+-- It says thanks by default, with optional whisper or THANK emote modes.
 
 local DEFAULT_MESSAGE = "Thanks for the buff!"
 local DEFAULT_MESSAGES = {
@@ -41,7 +41,7 @@ local db = OctoThanksDB or {}
 OctoThanksDB = db
 
 if db.enabled == nil then db.enabled = true end
-if db.channel ~= "SAY" and db.channel ~= "WHISPER" then db.channel = "SAY" end
+if db.channel ~= "SAY" and db.channel ~= "WHISPER" and db.channel ~= "EMOTE" then db.channel = "SAY" end
 if db.message == nil then db.message = DEFAULT_MESSAGE end
 if db.cooldown == nil then db.cooldown = DEFAULT_COOLDOWN end
 if db.delay == nil then db.delay = DEFAULT_DELAY end
@@ -173,6 +173,12 @@ local function SendThankYou(name, spellName)
     end
 
     lastThanked[name] = now
+    if db.channel == "EMOTE" then
+        if type(DoEmote) ~= "function" or not pcall(DoEmote, "THANK", name) then
+            Print("Thank emote unavailable or blocked by client.")
+        end
+        return
+    end
     local target = db.channel == "WHISPER" and name or nil
     SendChatMessage(BuildMessage(spellName), db.channel, nil, target)
 end
@@ -275,13 +281,14 @@ SlashCmdList["OCTOTHANKS"] = function(message)
         SetEnabled(true)
     elseif command == "off" then
         SetEnabled(false)
-    elseif command == "channel" then
+    elseif command == "channel" or command == "mode" then
         local channel = string.upper(rest)
-        if channel == "SAY" or channel == "WHISPER" then
+        if channel == "SAY" or channel == "WHISPER" or channel == "EMOTE" then
+            if db.channel ~= channel then pending = {} end
             db.channel = channel
             Print("thank-you channel: " .. string.lower(channel) .. ".")
         else
-            Print("Use /ot channel say | whisper")
+            Print("Use /ot mode say | whisper | emote")
         end
     elseif command == "message" and rest ~= "" then
         if rest == "default" or rest == "random" then
@@ -302,7 +309,7 @@ SlashCmdList["OCTOTHANKS"] = function(message)
         Print(db.includeGroup and "group buffs included." or "group buffs ignored.")
     else
         Print("/ot on | off")
-        Print("/ot channel say | whisper   (default: say)")
+        Print("/ot mode say | whisper | emote   (default: say; channel is an alias)")
         Print("/ot message default   (restore rotating messages)")
         Print("/ot message <text>   (use one fixed message; %s = spell name)")
         Print("Use %s in the message to include the spell name.")

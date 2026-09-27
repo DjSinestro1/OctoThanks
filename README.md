@@ -19,6 +19,7 @@ Commands:
 - `/ot on` or `/ot off`
 - `/ot channel say` (default; nearby players can hear it)
 - `/ot channel whisper` (private thanks to the buff caster)
+- `/ot mode emote` (built-in THANK emote directed at the buff caster)
 - `/ot message Thanks for the buff!`
 - `/ot message Thanks for %s!` (the `%s` becomes the spell name)
 - `/ot cooldown 60`
@@ -28,5 +29,12 @@ Commands:
 The default cooldown is 60 seconds per player and the default delay is 1 second.
 The channel is saved across reloads. Existing installations without a channel
 setting switch to say; an explicitly selected whisper setting is preserved.
+Emote choices are also saved. `mode` and `channel` are interchangeable; use
+`/ot mode say` or `/ot mode whisper` to return to text replies.
+Emote mode uses the game's fixed thank-you, not the 28 phrases or custom text.
+It passes the caster's name to DoEmote without changing your target. Targeted
+delivery still needs in-game testing; range/client restrictions may prevent the
+intended result. Failed requests do not trigger chat fallback or retries.
+Changing mode cancels pending replies.
 When Nampower is available, duration-aware aura events are used so only buffs
 strictly longer than 120 seconds can trigger a thank-you.

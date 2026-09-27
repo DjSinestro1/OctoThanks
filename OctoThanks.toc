@@ -2,7 +2,7 @@
 ## Title: OctoThanks
 ## Notes: Automatically thank players who buff you.
 ## Author: OctoWow
-## Version: 1.3.0
+## Version: 1.4.0
 ## SavedVariables: OctoThanksDB
 
 OctoThanks.lua

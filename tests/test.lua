@@ -1,6 +1,6 @@
 local function eq(a,b) assert(a==b,tostring(a).." ~= "..tostring(b)) end
 local function make(saved)
-    local h={now=100,sent={}}
+    local h={now=100,sent={},emotes={}}
     local e=setmetatable({OctoThanksDB=saved,SlashCmdList={}}, {__index=_G})
     e.DEFAULT_CHAT_FRAME={AddMessage=function() end}
     e.GetTime=function() return h.now end
@@ -8,6 +8,10 @@ local function make(saved)
     e.UnitIsPlayer=function(guid) return guid~="NPC" end
     e.CreateFrame=function() return {RegisterEvent=function() end,SetScript=function(_,event,f) h[event]=f end} end
     e.SendChatMessage=function(text,channel,_,target) h.sent[#h.sent+1]={text=text,channel=channel,target=target} end
+    e.DoEmote=function(token,target)
+        h.emotes[#h.emotes+1]={token=token,target=target}
+        if h.emoteError then error("blocked") end
+    end
     e.Nampower={HasMinimumVersion=function() return true end,RegisterEvent=function(_,_,f) h.aura=f end}
     local chunk=assert(loadfile("OctoThanks.lua")); setfenv(chunk,e); chunk()
     function h:cmd(text) e.SlashCmdList.OCTOTHANKS(text) end
@@ -35,3 +39,21 @@ for i=1,400 do
 end
 local count=0; for _ in pairs(replies) do count=count+1 end; eq(count,28)
 print("PASS OctoThanks channel/filter/cooldown/reload/28-reply tests")
+h=make(); h:cmd("mode EmOtE"); eq(h.env.OctoThanksDB.channel,"EMOTE")
+h=make(h.env.OctoThanksDB); h:buff(); eq(#h.sent,0); eq(#h.emotes,1)
+eq(h.emotes[1].token,"THANK"); eq(h.emotes[1].target,"Friend")
+h:buff(); eq(#h.emotes,1)
+h:cmd("mode whisper"); h:buff(); eq(#h.sent,0)
+h.now=h.now+61; h:buff(); eq(h.sent[1].channel,"WHISPER")
+h:cmd("mode say"); h.now=h.now+61; h:buff(); eq(h.sent[2].channel,"SAY")
+h=make(); h.aura(1,"FriendGuid","self",nil,nil,nil,nil,3600000)
+h:cmd("channel emote"); h.now=h.now+2; h.OnUpdate(); eq(#h.sent,0); eq(#h.emotes,0)
+for _,d in ipairs({0,15000,120000,120001}) do
+    h=make({channel="EMOTE"}); h:buff(d); eq(#h.emotes,d>120000 and 1 or 0); eq(#h.sent,0)
+end
+h=make({channel="EMOTE"}); h:buff(3600000,"player"); eq(#h.emotes,0)
+h=make({channel="EMOTE"}); h:buff(3600000,"NPC"); eq(#h.emotes,0)
+h=make({channel="EMOTE"}); h:cmd("off"); h:buff(); eq(#h.emotes,0)
+h=make({channel="EMOTE"}); h.emoteError=true; h:buff(); h:buff(); eq(#h.emotes,1); eq(#h.sent,0)
+h=make({channel="EMOTE"}); h.env.DoEmote=nil; h:buff(); eq(#h.sent,0)
+print("PASS OctoThanks optional targeted emote/filter/cooldown/mode/reload tests")
