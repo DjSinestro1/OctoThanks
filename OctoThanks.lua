@@ -1,6 +1,6 @@
 -- OctoThanks
 -- Small Vanilla 1.12 addon for OctoWow/Turtle-style clients.
--- It whispers a thank-you to players who cast a helpful buff on you.
+-- It says (or optionally whispers) thanks to players who buff you.
 
 local DEFAULT_MESSAGE = "Thanks for the buff!"
 local DEFAULT_MESSAGES = {
@@ -12,6 +12,26 @@ local DEFAULT_MESSAGES = {
     "Thank you kindly for the buff!",
     "You are awesome—thanks for the buff!",
     "Ayyy, appreciate the buffs! You rock.",
+    "That buff is the bee's knees! Cheers, mate!",
+    "You're a diamond geezer - cheers for the buff!",
+    "That buff's proper mint. Nice one!",
+    "Cheers, my china plate! Lovely buff.",
+    "That's a bit of all right! Ta for the buff!",
+    "Respect, fam - appreciate the buff!",
+    "Big up yourself! Thanks for looking out.",
+    "That buff's fire, no cap. Appreciate you!",
+    "You're a real one. Thanks for the buff!",
+    "Buff game on point! Much love!",
+    "Now we're cooking! Thanks for the sweet buff!",
+    "That's smooth, cool cat. Thanks for the buff!",
+    "Right on! That buff's got me grooving.",
+    "Groovy stuff! Appreciate the magical hookup!",
+    "Cheers, legend! That buff's a beaut.",
+    "Good on ya, mate! Thanks for the buff!",
+    "Sweet as! Chur for the buff!",
+    "Shot, bru! That's a lekker buff!",
+    "That's class! Cheers a million for the buff!",
+    "Beauty, eh? Thanks a bunch for the buff!",
 }
 local DEFAULT_COOLDOWN = 60
 local DEFAULT_DELAY = 1
@@ -21,6 +41,7 @@ local db = OctoThanksDB or {}
 OctoThanksDB = db
 
 if db.enabled == nil then db.enabled = true end
+if db.channel ~= "SAY" and db.channel ~= "WHISPER" then db.channel = "SAY" end
 if db.message == nil then db.message = DEFAULT_MESSAGE end
 if db.cooldown == nil then db.cooldown = DEFAULT_COOLDOWN end
 if db.delay == nil then db.delay = DEFAULT_DELAY end
@@ -152,7 +173,8 @@ local function SendThankYou(name, spellName)
     end
 
     lastThanked[name] = now
-    SendChatMessage(BuildMessage(spellName), "WHISPER", nil, name)
+    local target = db.channel == "WHISPER" and name or nil
+    SendChatMessage(BuildMessage(spellName), db.channel, nil, target)
 end
 
 local function QueueThankYou(name, spellName)
@@ -253,10 +275,18 @@ SlashCmdList["OCTOTHANKS"] = function(message)
         SetEnabled(true)
     elseif command == "off" then
         SetEnabled(false)
+    elseif command == "channel" then
+        local channel = string.upper(rest)
+        if channel == "SAY" or channel == "WHISPER" then
+            db.channel = channel
+            Print("thank-you channel: " .. string.lower(channel) .. ".")
+        else
+            Print("Use /ot channel say | whisper")
+        end
     elseif command == "message" and rest ~= "" then
         if rest == "default" or rest == "random" then
             db.message = DEFAULT_MESSAGE
-            Print("message rotation restored (8 variations).")
+            Print("message rotation restored (28 variations).")
         else
             db.message = rest
             Print("message set to: " .. db.message)
@@ -272,12 +302,14 @@ SlashCmdList["OCTOTHANKS"] = function(message)
         Print(db.includeGroup and "group buffs included." or "group buffs ignored.")
     else
         Print("/ot on | off")
+        Print("/ot channel say | whisper   (default: say)")
         Print("/ot message default   (restore rotating messages)")
         Print("/ot message <text>   (use one fixed message; %s = spell name)")
         Print("Use %s in the message to include the spell name.")
         Print("/ot cooldown <seconds>   /ot delay <seconds>")
         Print("/ot group on | off")
         Print("Current: " .. (db.enabled and "enabled" or "disabled")
+            .. ", channel " .. string.lower(db.channel)
             .. ", cooldown " .. db.cooldown .. "s, delay " .. db.delay .. "s")
     end
 end
