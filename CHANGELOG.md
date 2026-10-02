@@ -1,3 +1,10 @@
+# 1.5.0
+
+- Changes the default mode from SAY to WHISPER.
+- Preserves an explicitly selected SAY, WHISPER, or EMOTE mode across reloads and logouts.
+- Repairs installations whose saved mode was missing: they now initialize to WHISPER instead of SAY.
+- Adds relog/default-mode regression coverage.
+
 # 1.4.0
 
 - Adds optional targeted THANK emotes via /ot mode emote (channel is an alias).

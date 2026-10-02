@@ -1,6 +1,6 @@
 # OctoThanks
 
-OctoThanks automatically says a thank-you to a player who gives you a buff
+OctoThanks automatically thanks a player who gives you a buff
 lasting longer than two minutes. Short buffs and healing-over-time effects such
 as Renew are ignored.
 
@@ -17,7 +17,8 @@ is available, also uses `AURA_CAST_ON_SELF` for caster-aware detection.
 Commands:
 
 - `/ot on` or `/ot off`
-- `/ot channel say` (default; nearby players can hear it)
+- `/ot mode whisper` (default; private thanks to the buff caster)
+- `/ot mode say` (nearby players can hear it)
 - `/ot channel whisper` (private thanks to the buff caster)
 - `/ot mode emote` (built-in THANK emote directed at the buff caster)
 - `/ot message Thanks for the buff!`
@@ -27,8 +28,9 @@ Commands:
 - `/ot group on` or `/ot group off`
 
 The default cooldown is 60 seconds per player and the default delay is 1 second.
-The channel is saved across reloads. Existing installations without a channel
-setting switch to say; an explicitly selected whisper setting is preserved.
+The selected mode is saved across reloads and logouts. Existing installations
+without a saved channel now default to whisper. An explicitly selected SAY,
+WHISPER, or EMOTE setting is preserved; the addon never resets a valid choice.
 Emote choices are also saved. `mode` and `channel` are interchangeable; use
 `/ot mode say` or `/ot mode whisper` to return to text replies.
 Emote mode uses the game's fixed thank-you, not the 28 phrases or custom text.

@@ -41,7 +41,8 @@ local db = OctoThanksDB or {}
 OctoThanksDB = db
 
 if db.enabled == nil then db.enabled = true end
-if db.channel ~= "SAY" and db.channel ~= "WHISPER" and db.channel ~= "EMOTE" then db.channel = "SAY" end
+-- Whisper is the safe default. Preserve an explicit SAY or EMOTE choice.
+if db.channel ~= "SAY" and db.channel ~= "WHISPER" and db.channel ~= "EMOTE" then db.channel = "WHISPER" end
 if db.message == nil then db.message = DEFAULT_MESSAGE end
 if db.cooldown == nil then db.cooldown = DEFAULT_COOLDOWN end
 if db.delay == nil then db.delay = DEFAULT_DELAY end
@@ -309,7 +310,7 @@ SlashCmdList["OCTOTHANKS"] = function(message)
         Print(db.includeGroup and "group buffs included." or "group buffs ignored.")
     else
         Print("/ot on | off")
-        Print("/ot mode say | whisper | emote   (default: say; channel is an alias)")
+        Print("/ot mode say | whisper | emote   (default: whisper; channel is an alias)")
         Print("/ot message default   (restore rotating messages)")
         Print("/ot message <text>   (use one fixed message; %s = spell name)")
         Print("Use %s in the message to include the spell name.")

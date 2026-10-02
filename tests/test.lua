@@ -21,7 +21,7 @@ local function make(saved)
     end
     h.env=e; return h
 end
-local h=make(); h:buff(); eq(h.sent[1].channel,"SAY"); eq(h.sent[1].target,nil)
+local h=make(); eq(h.env.OctoThanksDB.channel,"WHISPER"); h:buff(); eq(h.sent[1].channel,"WHISPER"); eq(h.sent[1].target,"Friend")
 h:cmd("channel whisper"); h:buff(); eq(#h.sent,1); h.now=h.now+61; h:buff()
 eq(h.sent[2].channel,"WHISPER"); eq(h.sent[2].target,"Friend")
 h:cmd("channel raid"); eq(h.env.OctoThanksDB.channel,"WHISPER")
@@ -31,7 +31,10 @@ for _,d in ipairs({0,15000,120000,120001}) do h=make(); h:buff(d); eq(#h.sent,d>
 h=make(); h:buff(3600000,"player"); eq(#h.sent,0)
 h=make(); h:buff(3600000,"NPC"); eq(#h.sent,0)
 h=make(); h:cmd("off"); h:buff(); eq(#h.sent,0)
-h=make({channel="GUILD"}); eq(h.env.OctoThanksDB.channel,"SAY")
+h=make({channel="GUILD"}); eq(h.env.OctoThanksDB.channel,"WHISPER")
+h=make({channel="SAY"}); eq(h.env.OctoThanksDB.channel,"SAY"); h:buff(); eq(h.sent[1].channel,"SAY")
+h=make({channel="WHISPER"}); eq(h.env.OctoThanksDB.channel,"WHISPER"); h:buff(); eq(h.sent[1].channel,"WHISPER")
+h=make({channel="EMOTE"}); eq(h.env.OctoThanksDB.channel,"EMOTE"); h:buff(); eq(#h.emotes,1)
 h=make(); local replies={}; local previous
 for i=1,400 do
     h.now=h.now+61; h:buff(); local text=h.sent[#h.sent].text
