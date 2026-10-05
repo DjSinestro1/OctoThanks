@@ -1,3 +1,13 @@
+# 1.6.0
+
+- Adds an in-game options window opened with `/ot gui` or the minimap button.
+- Adds saved controls for enable/disable, whisper/say/emote mode, five-second reply delay, cooldown, group handling, and custom messages.
+- Adds optional suppression of whispers to party/raid buff casters.
+- Adds random positive emotes: Salute, Bow, Wave, Cheer, and Applaud.
+- Adds an ignored-buff list that accepts spell names or spell IDs.
+- Migrates the old implicit one-second delay to the new five-second default.
+- Keeps slash commands available as a troubleshooting and accessibility fallback.
+
 # 1.5.0
 
 - Changes the default mode from SAY to WHISPER.

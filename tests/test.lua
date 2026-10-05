@@ -1,11 +1,22 @@
 local function eq(a,b) assert(a==b,tostring(a).." ~= "..tostring(b)) end
 local function make(saved)
+    saved = saved or {}
+    local useDefaultDelay = saved.__defaultDelay
+    saved.__defaultDelay = nil
+    if not useDefaultDelay and saved.delay == nil then saved.delay = 2 end
     local h={now=100,sent={},emotes={}}
     local e=setmetatable({OctoThanksDB=saved,SlashCmdList={}}, {__index=_G})
     e.DEFAULT_CHAT_FRAME={AddMessage=function() end}
     e.GetTime=function() return h.now end
-    e.UnitName=function(unit) return unit=="player" and "Self" or "Friend" end
+    e.GetNumPartyMembers=function() return h.partyName and 1 or 0 end
+    e.GetNumRaidMembers=function() return 0 end
+    e.UnitName=function(unit)
+        if unit=="player" then return "Self" end
+        if unit=="party1" and h.partyName then return h.partyName end
+        return "Friend"
+    end
     e.UnitIsPlayer=function(guid) return guid~="NPC" end
+    e.GetSpellRecField=function() return "Blessing of Might" end
     e.CreateFrame=function() return {RegisterEvent=function() end,SetScript=function(_,event,f) h[event]=f end} end
     e.SendChatMessage=function(text,channel,_,target) h.sent[#h.sent+1]={text=text,channel=channel,target=target} end
     e.DoEmote=function(token,target)
@@ -60,3 +71,9 @@ h=make({channel="EMOTE"}); h:cmd("off"); h:buff(); eq(#h.emotes,0)
 h=make({channel="EMOTE"}); h.emoteError=true; h:buff(); h:buff(); eq(#h.emotes,1); eq(#h.sent,0)
 h=make({channel="EMOTE"}); h.env.DoEmote=nil; h:buff(); eq(#h.sent,0)
 print("PASS OctoThanks optional targeted emote/filter/cooldown/mode/reload tests")
+h=make({__defaultDelay=true}); eq(h.env.OctoThanksDB.delay,5)
+h=make({delay=5}); h:buff(); eq(#h.sent,0); h.now=h.now+3; h.OnUpdate(); eq(#h.sent,1)
+h=make({skipGroupWhispers=true}); h.partyName="Friend"; h:buff(); eq(#h.sent,0); h.partyName=nil; h.now=h.now+61; h:buff(); eq(#h.sent,1)
+h=make(); h:cmd("ignore add Blessing of Might"); h:buff(); eq(#h.sent,0); h:cmd("ignore remove Blessing of Might"); h:cmd("ignore add 1"); h.now=h.now+61; h:buff(); eq(#h.sent,0)
+h=make({channel="EMOTE",emoteStyle="RANDOM"}); h:buff(); local allowed={SALUTE=true,BOW=true,WAVE=true,CHEER=true,APPLAUD=true}; assert(allowed[h.emotes[1].token]); eq(h.emotes[1].target,"Friend")
+print("PASS OctoThanks delay/group-ignore/ignored-buff/random-emote tests")
